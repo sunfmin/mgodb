@@ -2,7 +2,6 @@ package mgodb
 
 import (
 	"launchpad.net/mgo"
-	"launchpad.net/mgo/bson"
 )
 
 var dialstring, database string
@@ -19,11 +18,16 @@ func getSession() (s *mgo.Session) {
 		return session
 	}
 
+	if database == "" || dialstring == "" {
+		panic("mgo: must setup database or dialstring with mgo.Setup(...)")
+	}
+
 	var err error
 	session, err = mgo.Dial(dialstring)
 	if err != nil {
 		panic(err)
 	}
+
 	return session
 }
 
@@ -41,14 +45,4 @@ func CollectionsDo(f func(c ...*mgo.Collection), names ...string) {
 		cs = append(cs, s.DB(database).C(name))
 	}
 	f(cs...)
-}
-
-type Id interface {
-	IdByForeignKeys() string
-}
-
-func Save(collectionName string, obj Id) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		rc.Upsert(bson.M{"_id": obj.IdByForeignKeys()}, obj)
-	})
 }
