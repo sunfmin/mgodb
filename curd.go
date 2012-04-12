@@ -16,6 +16,13 @@ func Save(collectionName string, obj Id) {
 	})
 }
 
+func Delete(collectionName string, id string) (err error) {
+	CollectionDo(collectionName, func(rc *mgo.Collection) {
+		err = rc.RemoveAll(bson.M{"_id": id})
+	})
+	return
+}
+
 func Update(collectionName string, obj Id) (err error) {
 	CollectionDo(collectionName, func(rc *mgo.Collection) {
 		v := reflect.ValueOf(obj)
