@@ -7,13 +7,14 @@ import (
 )
 
 type Id interface {
-	IdByForeignKeys() string
+	MakeId() interface{}
 }
 
-func Save(collectionName string, obj Id) {
+func Save(collectionName string, obj Id) (err error) {
 	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		rc.Upsert(bson.M{"_id": obj.IdByForeignKeys()}, obj)
+		_, err = rc.Upsert(bson.M{"_id": obj.MakeId()}, obj)
 	})
+	return
 }
 
 func Delete(collectionName string, id string) (err error) {
@@ -31,7 +32,7 @@ func Update(collectionName string, obj Id) (err error) {
 		}
 
 		found := reflect.New(v.Type()).Interface()
-		rc.Find(bson.M{"_id": obj.IdByForeignKeys()}).One(found)
+		rc.Find(bson.M{"_id": obj.MakeId()}).One(found)
 
 		originalValue := reflect.ValueOf(found)
 		if originalValue.Kind() == reflect.Ptr {
@@ -47,7 +48,7 @@ func Update(collectionName string, obj Id) (err error) {
 			fieldValue.Set(originalValue.Field(i))
 		}
 
-		rc.Upsert(bson.M{"_id": obj.IdByForeignKeys()}, v.Interface())
+		rc.Upsert(bson.M{"_id": obj.MakeId()}, v.Interface())
 	})
 	return
 }
@@ -59,7 +60,7 @@ func FindAll(collectionName string, query interface{}, result interface{}) (err 
 	return
 }
 
-func FindOne(collectionName string, id string, result interface{}) (err error) {
+func FindOne(collectionName string, id interface{}, result interface{}) (err error) {
 	CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(bson.M{"_id": id}).One(result)
 	})

@@ -18,7 +18,7 @@ type Company struct {
 	Name string
 }
 
-func (u *User) IdByForeignKeys() string {
+func (u *User) MakeId() string {
 	u.Id = u.Email
 	return u.Id
 }
