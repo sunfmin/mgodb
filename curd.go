@@ -17,7 +17,7 @@ func Save(collectionName string, obj Id) (err error) {
 	return
 }
 
-func Delete(collectionName string, id string) (err error) {
+func Delete(collectionName string, id interface{}) (err error) {
 	CollectionDo(collectionName, func(rc *mgo.Collection) {
 		err = rc.RemoveAll(bson.M{"_id": id})
 	})
@@ -56,13 +56,32 @@ func Update(collectionName string, obj Id) (err error) {
 func FindAll(collectionName string, query interface{}, result interface{}) (err error) {
 	CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(query).All(result)
+		if err == mgo.NotFound {
+			result = nil
+			err = nil
+		}
 	})
 	return
 }
 
-func FindOne(collectionName string, id interface{}, result interface{}) (err error) {
+func FindOne(collectionName string, query interface{}, result interface{}) (err error) {
+	CollectionDo(collectionName, func(c *mgo.Collection) {
+		err = c.Find(query).One(result)
+		if err == mgo.NotFound {
+			result = nil
+			err = nil
+		}
+	})
+	return
+}
+
+func FindById(collectionName string, id interface{}, result interface{}) (err error) {
 	CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(bson.M{"_id": id}).One(result)
+		if err == mgo.NotFound {
+			result = nil
+			err = nil
+		}
 	})
 	return
 }
