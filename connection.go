@@ -37,6 +37,12 @@ func CollectionDo(name string, f func(c *mgo.Collection)) {
 	f(s.DB(database).C(name))
 }
 
+func DatabaseDo(f func(db *mgo.Database)) {
+	s := getSession().Copy()
+	defer s.Close()
+	f(s.DB(database))
+}
+
 func CollectionsDo(f func(c ...*mgo.Collection), names ...string) {
 	s := getSession().Copy()
 	defer s.Close()
