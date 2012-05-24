@@ -17,6 +17,25 @@ func Save(collectionName string, obj Id) (err error) {
 	return
 }
 
+func DropCollection(collectionName string) (err error) {
+	CollectionDo(collectionName, func(rc *mgo.Collection) {
+		err = rc.DropCollection()
+	})
+	return
+}
+
+func DropCollections(collectionNames ...string) (err error) {
+	CollectionsDo(func(rcs ...*mgo.Collection) {
+		for _, rc := range rcs {
+			err1 := rc.DropCollection()
+			if err == nil && err1 != nil {
+				err = err1
+			}
+		}
+	}, collectionNames...)
+	return
+}
+
 func Delete(collectionName string, id interface{}) (err error) {
 	CollectionDo(collectionName, func(rc *mgo.Collection) {
 		err = rc.RemoveAll(bson.M{"_id": id})
