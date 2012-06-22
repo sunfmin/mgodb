@@ -38,7 +38,7 @@ func DropCollections(collectionNames ...string) (err error) {
 
 func Delete(collectionName string, id interface{}) (err error) {
 	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		err = rc.RemoveAll(bson.M{"_id": id})
+		_, err = rc.RemoveAll(bson.M{"_id": id})
 	})
 	return
 }
