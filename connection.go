@@ -1,7 +1,7 @@
 package mgodb
 
 import (
-	"launchpad.net/mgo"
+	"labix.org/v2/mgo"
 )
 
 var dialstring, database string
