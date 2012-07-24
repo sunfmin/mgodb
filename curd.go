@@ -1,94 +1,45 @@
 package mgodb
 
-import (
-	"labix.org/v2/mgo"
-	"labix.org/v2/mgo/bson"
-	"reflect"
-)
-
 type Id interface {
 	MakeId() interface{}
 }
 
 func Save(collectionName string, obj Id) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		_, err = rc.Upsert(bson.M{"_id": obj.MakeId()}, obj)
-	})
+	err = DefaultDatabase.Save(collectionName, obj)
 	return
 }
 
 func DropCollection(collectionName string) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		err = rc.DropCollection()
-	})
+	err = DefaultDatabase.DropCollection(collectionName)
 	return
 }
 
 func DropCollections(collectionNames ...string) (err error) {
-	CollectionsDo(func(rcs ...*mgo.Collection) {
-		for _, rc := range rcs {
-			err1 := rc.DropCollection()
-			if err == nil && err1 != nil {
-				err = err1
-			}
-		}
-	}, collectionNames...)
+	err = DefaultDatabase.DropCollections(collectionNames...)
 	return
 }
 
 func Delete(collectionName string, id interface{}) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		_, err = rc.RemoveAll(bson.M{"_id": id})
-	})
+	err = DefaultDatabase.Delete(collectionName, id)
 	return
 }
 
 func Update(collectionName string, obj Id) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
-		v := reflect.ValueOf(obj)
-		if v.Kind() == reflect.Ptr {
-			v = v.Elem()
-		}
-
-		found := reflect.New(v.Type()).Interface()
-		rc.Find(bson.M{"_id": obj.MakeId()}).One(found)
-
-		originalValue := reflect.ValueOf(found)
-		if originalValue.Kind() == reflect.Ptr {
-			originalValue = originalValue.Elem()
-		}
-
-		for i := 0; i < v.NumField(); i++ {
-			fieldValue := v.Field(i)
-			if !reflect.DeepEqual(fieldValue.Interface(), reflect.Zero(fieldValue.Type()).Interface()) {
-				continue
-			}
-
-			fieldValue.Set(originalValue.Field(i))
-		}
-
-		rc.Upsert(bson.M{"_id": obj.MakeId()}, v.Interface())
-	})
+	err = DefaultDatabase.Update(collectionName, obj)
 	return
 }
 
 func FindAll(collectionName string, query interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
-		err = c.Find(query).All(result)
-	})
+	err = DefaultDatabase.FindAll(collectionName, query, result)
 	return
 }
 
 func FindOne(collectionName string, query interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
-		err = c.Find(query).One(result)
-	})
+	err = DefaultDatabase.FindOne(collectionName, query, result)
 	return
 }
 
 func FindById(collectionName string, id interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
-		err = c.Find(bson.M{"_id": id}).One(result)
-	})
+	err = DefaultDatabase.FindById(collectionName, id, result)
 	return
 }
