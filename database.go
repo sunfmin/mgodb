@@ -66,14 +66,14 @@ func (db *Database) CollectionsDo(f func(c ...*mgo.Collection), names ...string)
 }
 
 func (db *Database) Save(collectionName string, obj Id) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
+	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
 		_, err = rc.Upsert(bson.M{"_id": obj.MakeId()}, obj)
 	})
 	return
 }
 
 func (db *Database) DropCollection(collectionName string) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
+	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
 		err = rc.DropCollection()
 	})
 	return
@@ -92,14 +92,14 @@ func (db *Database) DropCollections(collectionNames ...string) (err error) {
 }
 
 func (db *Database) Delete(collectionName string, id interface{}) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
+	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
 		_, err = rc.RemoveAll(bson.M{"_id": id})
 	})
 	return
 }
 
 func (db *Database) Update(collectionName string, obj Id) (err error) {
-	CollectionDo(collectionName, func(rc *mgo.Collection) {
+	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
 		v := reflect.ValueOf(obj)
 		if v.Kind() == reflect.Ptr {
 			v = v.Elem()
@@ -128,21 +128,21 @@ func (db *Database) Update(collectionName string, obj Id) (err error) {
 }
 
 func (db *Database) FindAll(collectionName string, query interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
+	db.CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(query).All(result)
 	})
 	return
 }
 
 func (db *Database) FindOne(collectionName string, query interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
+	db.CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(query).One(result)
 	})
 	return
 }
 
 func (db *Database) FindById(collectionName string, id interface{}, result interface{}) (err error) {
-	CollectionDo(collectionName, func(c *mgo.Collection) {
+	db.CollectionDo(collectionName, func(c *mgo.Collection) {
 		err = c.Find(bson.M{"_id": id}).One(result)
 	})
 	return
