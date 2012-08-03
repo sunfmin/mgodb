@@ -80,7 +80,7 @@ func (db *Database) DropCollection(collectionName string) (err error) {
 }
 
 func (db *Database) DropCollections(collectionNames ...string) (err error) {
-	CollectionsDo(func(rcs ...*mgo.Collection) {
+	db.CollectionsDo(func(rcs ...*mgo.Collection) {
 		for _, rc := range rcs {
 			err1 := rc.DropCollection()
 			if err == nil && err1 != nil {
